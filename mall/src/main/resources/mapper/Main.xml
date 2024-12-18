@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.product.dao.productDao">
+
+
+	<resultMap type = "com.mall.vo.product.productInfoVO" id = "productMap" >
+		<result column = "PRODUCT_CODE" property = "productCode"/>
+		<result column = "CATEGORY_CODE" property = "categoryCode"/>
+		<result column = "PRODUCT_NAME" property = "productName"/>
+		<result column = "PRICE" property = "price"/>
+		<result column = "QTA" property = "qta"/>
+		<result column = "REG_DT" property = "regDt"/>
+		<result column = "PRODUCT_ST" property = "productSt"/>
+		<result column = "ORIGINAL_PRICE" property = "originalPrice"/>
+		<result column = "CONNECTION" property = "connection"/>
+		<result column = "THUMBNAIL" property = "thumbnail"/>
+		<result column = "PRODUCT_DETAIL" property = "productDetail"/>
+	</resultMap>
+	
+	<resultMap type = "com.mall.vo.product.cartVO" id = "cartMap" >
+		<result column = "USER_ID" 			property = "userId"/>
+		<result column = "PRODUCT_CODE" 	property = "productCode"/>
+		<result column = "BUY_QTA" 			property = "buyQta"/>
+		<result column = "BUY_DT" 			property = "buyDt"/>
+		<result column = "PRODUCT_NAME"		property = "productName"/>
+		<result column = "THUMBNAIL" 		property = "thumbnail"/>
+		<result column = "PRICE" 			property = "price"/>
+	</resultMap>
+
+
+	<select id ="selectProductList" resultMap = "productMap">
+		SELECT
+			A.PRODUCT_CODE,
+			A.CATEGORY_CODE,
+			A.PRODUCT_NAME,
+			A.PRICE,
+			A.QTA,
+			TO_CHAR(A.REG_DT,'YYYY-MM-DD') AS REG_DT,
+			A.PRODUCT_ST,
+			A.ORIGINAL_PRICE,
+			A.CONNECTION,
+			A.THUMBNAIL,
+			A.PRODUCT_DETAIL
+		FROM TB_PRODUCT_INFO A
+	</select>
+	
+	<select id="selectProductInfo" resultMap = "productMap">
+		SELECT
+			A.PRODUCT_CODE,
+			A.PRODUCT_NAME,
+			A.PRICE,
+			A.QTA,
+			A.CATEGORY_CODE,
+			TO_CHAR(A.REG_DT,'YYYY-MM-DD') AS REG_DT,
+			A.PRODUCT_ST,
+			A.ORIGINAL_PRICE,
+			A.CONNECTION,
+			A.THUMBNAIL,
+			A.PRODUCT_DETAIL
+		FROM TB_PRODUCT_INFO A
+		WHERE A.PRODUCT_CODE = #{productCode}
+	</select>
+	
+	<!-- 
+	<insert id="addProduct">
+		INSERT INTO TB_CART
+			(USER_ID, PRODUCT_CODE, BUY_QTA, BUY_DT)
+		VALUES(#{userId}, #{productCode}, #{buyQta}, sysdate)
+	</insert>
+	 -->
+	 
+	 <update id='setCartlist'>
+	 
+	 	MERGE
+		INTO TB_CART A
+		USING DUAL
+    		ON (USER_ID =#{userId} AND PRODUCT_CODE =#{productCode})
+    		WHEN MATCHED THEN
+        		UPDATE SET
+            	BUY_QTA = BUY_QTA + #{buyQta}
+    		WHEN NOT MATCHED THEN
+        		INSERT(USER_ID, PRODUCT_CODE, BUY_QTA, BUY_DT)
+        		VALUES(#{userId}, #{productCode}, #{buyQta}, sysdate)
+	 
+	 </update>
+	
+	<select id="selectCart" resultMap = "cartMap">
+		SELECT
+			A.PRODUCT_CODE,
+			A.BUY_QTA,
+			TO_CHAR(A.BUY_DT,'YYYY-MM-DD') AS BUY_DT,
+			A.USER_ID
+		FROM TB_CART A
+		WHERE A.USER_ID = #{userId}
+		<if test="productCode!=null and productCode!='' ">
+		AND PRODUCT_CODE = #{productCode}
+		</if>
+	</select>
+	
+	<!-- 
+	<update id = "modifyQta">
+		UPDATE TB_CART 
+			SET BUY_QTA = BUY_QTA + #{buyQta} 
+		WHERE PRODUCT_CODE = #{productCode}
+	</update>
+	-->
+	
+	<select id ="selectCartList" resultMap = "cartMap">
+		SELECT
+			B.PRODUCT_CODE,
+			B.BUY_QTA,
+			TO_CHAR(B.BUY_DT,'YYYY-MM-DD') AS BUY_DT,
+			B.USER_ID,
+			A.PRODUCT_NAME,
+			A.THUMBNAIL,
+			A.PRICE
+		FROM TB_PRODUCT_INFO A, TB_CART B
+		WHERE B.USER_ID = #{userId} 
+		AND A.PRODUCT_CODE = B.PRODUCT_CODE
+	</select>
+	
+	<update id = "updateQtaCart">
+		UPDATE TB_CART 
+		SET BUY_QTA = #{buyQta} 
+		WHERE PRODUCT_CODE = #{productCode}
+	</update>
+	
+	<delete id = "removeFromCart">
+		DELETE FROM TB_CART  
+		WHERE PRODUCT_CODE = #{productCode}
+	</delete>	
+		
+</mapper>

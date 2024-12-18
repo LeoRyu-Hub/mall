@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.user.dao.userDao">
+
+	<resultMap type = "com.mall.vo.user.userVO" id = "userMap" >
+		<result column = "USER_ID" property = "userId"/>
+		<result column = "USER_NAME" property = "userName"/>
+		<result column = "EMAIL" property = "email"/>
+		<result column = "PHONE" property = "phone"/>
+		<result column = "ADDR" property = "addr"/>
+		<result column = "USER_PASSWORD" property = "userPassword"/>	
+		<result column = "JOIN_DT" property = "joinDt"/>	
+	</resultMap>
+	
+	<insert id='insertUser'>
+		INSERT INTO TB_USER_INFO
+			(USER_ID, USER_NAME, EMAIL, PHONE, ADDR, USER_PASSWORD, JOIN_DT)
+		VALUES
+			( #{userId}, #{userName}, #{email}, #{phone}, #{addr}, #{userPassword}, sysdate)
+	</insert>
+	
+	<select id='selectUserInfo' resultMap ="userMap">
+		SELECT
+			A.USER_PASSWORD,
+			A.USER_ID,
+			A.EMAIL,
+			A.USER_NAME,
+			A.ADDR,
+			A.PHONE
+		FROM TB_USER_INFO A
+		WHERE USER_ID = #{userId}
+	</select>
+	
+
+	
+	
+</mapper>

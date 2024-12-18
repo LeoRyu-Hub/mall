@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mall.product.dao.productDao">
+
+	<select id="createNewOrderNo" resultType="String">
+		SELECT (MAX(ORDER_NO)+1)
+		FROM TB_ORDER_INFO
+	</select>
+	
+	<insert id='insertOrderInfo'>
+		INSERT INTO TB_ORDER_INFO
+		(ORDER_NO, USER_ID, ORDER_NAME, ORDER_PHONE, RECEIVE_NAME, RECEIVE_PHONE, ORDER_ADDR, PAYMENT_METHOD, PAYMENT_AMOUNT, 
+		 ORDER_DT, ORDER_ST, REQUEST)
+		VALUES
+		(#{orderNo}, #{userId}, #{orderName}, #{orderPhone}, #{receiveName}, #{receivePhone}, #{orderAddr}, #{paymentMethod}, #{paymentAmount},
+		 SYSDATE, '결제완료', #{request})
+	</insert>
+	
+	<insert id ='insertOrderProductinfo'>
+		INSERT INTO TB_ORDER_PRODUCT(
+    		ORDER_NO, ORDER_SQ, PRODUCT_CODE, ORDER_QTA, SELLINGPRICE
+		)
+			SELECT 
+    			#{orderNo},
+    			ROWNUM,
+    			A.PRODUCT_CODE, 
+    			A.BUY_QTA,
+    			B.PRICE
+  			FROM TB_CART A, TB_PRODUCT_INFO B
+  			WHERE USER_ID = #{userId}
+  			AND A.PRODUCT_CODE = B.PRODUCT_CODE
+	</insert>
+	
+	<delete id = 'deleteFromCart'>
+		
+		DELETE FROM TB_CART
+		WHERE USER_ID=#{userId}
+	
+	</delete>
+
+
+	
+	
+</mapper>
